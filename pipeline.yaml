@@ -1,0 +1,21 @@
+on: push
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+    - name: Build container image
+      run: docker build -t myimage:latest .
+      
+    - name: Push image to registry
+      run: docker push myimage:latest
+    
+    - name: Update Kubernetes manifests
+      run: |
+        sed -i 's/old-image-tag/latest/g' deploy.yaml
+        git config --global user.name "GitHub Actions"
+        git config --global user.email "actions@github.com"
+        git add deploy.yaml
+        git commit -m "Update image tag"
+        git push
